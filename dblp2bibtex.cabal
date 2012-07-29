@@ -36,7 +36,7 @@ Library
                  bibtex >= 0.1,
                  HaXml >= 1.23.3,
                  text >= 0.11.2.0,
-                 hsparql >= 0.1.3,
+                 hsparql >= 0.1.2,
                  json >= 0.5,
                  aeson >= 0.6.0.2,
                  bytestring,
