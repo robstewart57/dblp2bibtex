@@ -8,6 +8,7 @@ This `dblp2bibtex` tool provides 3 features, primarily generating bibtex files f
 
 ## Usage
 
+```
 dblp2bibtex [OPTIONS]
   A Haskell utility to generate bibtex files for an author identified with a DBLP URI
 
@@ -18,6 +19,7 @@ Common flags:
   -o --outfile=Bibtex filename    (default 'export.bib')
   -h --help                       Display help message
   -v --version                    Print version information
+```
 
 ### Examples
 
@@ -38,7 +40,7 @@ $ dblp2bibtex -g http://dblp.l3s.de/d2r/resource/authors/Simon_Marlow -o my_pape
 
 ## Installation
 
-The `dblp2bibtex` utility is written in Haskell, and depends on some packages not currently on hackage.org. The Haskell platform is needed to resolve dependencies and to install `dblp2bibtex`. It can be downloaded easily using package managers on most Linux distributions, or directly from [http://hackage.haskell.org/platform//](Haskell Platform).
+The `dblp2bibtex` utility is written in Haskell, and depends on some packages not currently on hackage.org. The Haskell platform is needed to resolve dependencies and to install `dblp2bibtex`. It can be downloaded easily using package managers on most Linux distributions, or directly from [Haskell Platform](http://hackage.haskell.org/platform/).
 
 ```
 cabal update
@@ -54,4 +56,4 @@ cabal install
 
 ## Issues?
 
-This can be regarded as experimental software, and will probably have edge case bugs. Contributions are welcome! Please report issues on the GitHub issues: [https://github.com/robstewart57/dblp2bibtex/issues](here).
+This can be regarded as experimental software, and will probably have edge case bugs. Contributions are welcome! Please report issues on the GitHub issues: [issues](https://github.com/robstewart57/dblp2bibtex/issues).
