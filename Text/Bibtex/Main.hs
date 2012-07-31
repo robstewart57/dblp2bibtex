@@ -11,14 +11,15 @@ data MyOptions = MyOptions
     { generatebibtex :: String,
       search :: String,
       listpapers :: String,
-      outfile :: String
+      outfile :: String,
+      xref :: Bool
     } deriving (Data, Typeable, Show, Eq)
 
 _PROGRAM_NAME :: String
 _PROGRAM_NAME = "dblp2bibtex"
 
 _PROGRAM_VERSION :: String
-_PROGRAM_VERSION = "0.0.1"
+_PROGRAM_VERSION = "0.0.2"
 
 _PROGRAM_INFO :: String
 _PROGRAM_INFO = _PROGRAM_NAME ++ " version " ++ _PROGRAM_VERSION
@@ -34,7 +35,8 @@ myProgOpts = MyOptions
     { generatebibtex = def &= typ "Author URI" &= help "Get bibtex file for given URI",
       search = def  &= typ "Author name" &= help "Search for URI by name (e.g. \"Joe Bloggs\")",
       listpapers = def  &= typ "Author URI" &= help "List papers for an author URI",
-      outfile = def &= typ "Bibtex filename" &= help "(default 'export.bib')"
+      outfile = def &= typ "Bibtex filename" &= help "(default 'export.bib')",
+      xref = def &= help "Include cross reference entries"
     }
 
 run :: Mode (CmdArgs MyOptions)
@@ -48,12 +50,16 @@ run = cmdArgsMode $ myProgOpts
 defaultFilename :: String
 defaultFilename = "export.bib"
 
+optUsed :: String -> Bool
+optUsed x =  length x > 0
+
 main :: IO ()
 main = do
   opts <- cmdArgsRun run
   let searchURI = search opts
   let genURI = generatebibtex opts
   let lstURI = listpapers opts
+  let includeXRef = xref opts
       x = filter (==True) (map optUsed [searchURI,genURI,lstURI])
   when (length x /= 1) $
    error "Exactly one option must be used. Try --help option"
@@ -67,7 +73,7 @@ main = do
    if not (null genURI)
    then do
     -- Generate bibtex from DBLP URI
-    bibtex <- dblpToBibtex genURI
+    bibtex <- dblpToBibtex includeXRef genURI
     let fname = if not (null (outfile opts))
                  then outfile opts
                  else defaultFilename
@@ -76,7 +82,3 @@ main = do
     -- List papers for a URI
     titles <- publicationTitlesForAuthor lstURI
     mapM_ putStrLn titles
-
-
-optUsed :: String -> Bool
-optUsed x =  length x > 0

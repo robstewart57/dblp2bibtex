@@ -16,6 +16,7 @@ Common flags:
   -s --search=Author name         Search for URI by name (e.g. "Joe Bloggs")
   -l --listpapers=Author URI      List papers for an author URI
   -o --outfile=Bibtex filename    (default 'export.bib')
+  -x --xref                       Include cross reference entries
   -h --help                       Display help message
   -v --version                    Print version information
 
@@ -32,7 +33,7 @@ Deforestation for Higher-Order Functions.
 Composable memory transactions.
 ...
 
-$ dblp2bibtex -g http://dblp.l3s.de/d2r/resource/authors/Simon_Marlow -o my_papers.bib
+$ dblp2bibtex -x -g http://dblp.l3s.de/d2r/resource/authors/Simon_Marlow -o papers.bib
 ```
 
 

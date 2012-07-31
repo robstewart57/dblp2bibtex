@@ -1,6 +1,6 @@
 Name:          dblp2bibtex
 Homepage:      https://github.com/robstewart57/dblp2bibtex
-Version:       0.0.1
+Version:       0.0.2
 Synopsis:      A DBLP URI to Bibtex file generation utility
 Category:      Data
 Description:
@@ -46,6 +46,7 @@ Library
   Extensions: RecordWildCards
               OverloadedStrings
               ScopedTypeVariables
+              DoAndIfThenElse
   Exposed-Modules: Text.Bibtex.DBLPToBibtex
                    Text.Bibtex.SearchDBLPURIs
                    Text.Bibtex.ListPapers

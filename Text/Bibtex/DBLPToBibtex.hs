@@ -1,12 +1,12 @@
 module Text.Bibtex.DBLPToBibtex (
-    dblpToBibtex -- :: String -> IO String
+    dblpToBibtex -- :: String -> IO [String]
   ) where
 
 import Database.HSparql.Connection
 import Database.HSparql.QueryGenerator
 import Data.Text.Lazy (pack,unpack,stripPrefix)
 import Data.Text.Lazy.Internal (Text)
-import Data.Maybe (mapMaybe,fromJust)
+import Data.Maybe (mapMaybe,fromJust,isJust)
 import Network.HTTP
 import Text.XML.HaXml.Parse
 import Text.XML.HaXml.Posn
@@ -15,10 +15,13 @@ import Text.XML.HaXml
 import Text.BibTeX.Format
 import Text.BibTeX.Entry
 
-dblpToBibtex :: String -> IO [String]
-dblpToBibtex authorURI = do
+-- |'Bool' dictates whether cross referenced entries
+--  should be added. 'String' is the DBLP key for a
+--  given entry.
+dblpToBibtex :: Bool -> String -> IO [String]
+dblpToBibtex includeXRef authorURI = do
   keys <- getDBLPKeys authorURI
-  mapM (getEntry . unpack) keys
+  mapM (getEntry includeXRef . unpack) keys
 
 selectPublications :: String -> Query SelectQuery
 selectPublications authorURI = do
@@ -26,6 +29,7 @@ selectPublications authorURI = do
   let author  = iriRef authorURI
   publication <- var
   triple publication (foaf .:. "maker") author
+  distinct
   return SelectQuery { queryVars = [publication] }
 
 getDBLPKeys :: String -> IO [Text]
@@ -36,10 +40,15 @@ getDBLPKeys authorURI = do
   let dblpKeys = map (fromJust . stripPrefix dblpPrefix) uris
   return dblpKeys
 
-getEntry :: String -> IO String
-getEntry key = do
+getEntry ::  Bool -> String -> IO String
+getEntry includeXRef key = do
   xml <- downloadXML key
-  return (entryFromXML key xml)
+  let (bibEntry, maybeXref) = entryFromXML key xml
+  if includeXRef && isJust maybeXref then
+    (do xrefEntry <- getEntry False (fromJust maybeXref)
+        return $ xrefEntry ++ "\n" ++ bibEntry)
+    else return bibEntry
+
 
 downloadXML :: String -> IO String
 downloadXML key = do
@@ -47,7 +56,7 @@ downloadXML key = do
       request  = replaceHeader HdrUserAgent "dblp2bib-client" (getRequest url)
   simpleHTTP request >>= getResponseBody
 
-entryFromXML :: String -> String -> String
+entryFromXML :: String -> String -> (String, Maybe String)
 entryFromXML dblpKey xml = 
   let (Document _ _ root _) = xmlParse "error.log" xml
       rootElem = (CElem root noPos)
@@ -58,16 +67,18 @@ entryFromXML dblpKey xml =
 
       entryT = entryType' rootElem
 
-      authors = authorList $ extractTxt authorsQ rootElem
+      authorTuple = 
+       let xs = extractTxt authorsQ rootElem
+       in if null xs
+          then []
+          else [("author",authorList xs)]
 
-      maybeXref = extractTxt crossRefQ rootElem
-      crossRef = [("crossref", "DBLP:" ++ head maybeXref) | not (null maybeXref)]        
+      y = extractTxt crossRefQ rootElem
+      crossRef = [("crossref", "DBLP:" ++ head y) | not (null y)]
       tuples = entryTuples rootElem dblpEntry
       tuples' = ("bibsource","DBLP, http://dblp.uni-trier.de")
                 :
-                ("author",authors)
-                :
-                crossRef ++ tuples
+                authorTuple ++ crossRef ++ tuples
 
       bibtexEntry = Cons {
                        entryType = entryT
@@ -75,7 +86,11 @@ entryFromXML dblpKey xml =
                      , fields = tuples'
                     }
 
-   in (entry bibtexEntry)
+      maybeCrossRef = if not (null y)
+                  then Just $ head y
+                  else Nothing
+
+   in (entry bibtexEntry,maybeCrossRef)
 
 
 confirmEntryType :: Content i -> String -> Bool
@@ -84,7 +99,7 @@ confirmEntryType rootElem typeStr =
   
 entryType' :: Content i -> String
 entryType' rootElem = 
-  let xs = ["inproceedings","article","misc","book","phdthesis","incollection"]
+  let xs = ["proceedings","inproceedings","article","misc","book","phdthesis","incollection"]
       xs'  = filter (confirmEntryType rootElem) xs
   in if null xs'
    then error "Unexpected entry type"
