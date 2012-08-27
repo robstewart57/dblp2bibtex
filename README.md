@@ -41,19 +41,14 @@ $ dblp2bibtex -x -g http://dblp.l3s.de/d2r/resource/authors/Simon_Marlow -o pape
 
 ## Installation
 
-The `dblp2bibtex` utility is written in Haskell, and depends on some packages not currently on hackage.org. The Haskell platform is needed to resolve dependencies and to install `dblp2bibtex`. It can be downloaded easily using package managers on most Linux distributions, or directly from [Haskell Platform](http://hackage.haskell.org/platform/).
+The Haskell platform is needed to resolve dependencies and to install `dblp2bibtex`. It can be downloaded easily using package managers on most Linux distributions, or directly from [Haskell Platform](http://hackage.haskell.org/platform/).
 
-```
-cabal update
-cd ~/path
-git clone git://github.com/robstewart57/RDF4H.git
-cd RDF4H
-cabal install
-cd ~/path
-git clone git://github.com/robstewart57/dblp2bibtex.git
-cd dblp2bibtex
-cabal install
-```
+    cabal update
+    cd ~/path-to-install
+    git clone git://github.com/robstewart57/dblp2bibtex.git
+    cd dblp2bibtex
+    cabal install
+
 
 ## Issues?
 

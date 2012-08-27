@@ -40,7 +40,7 @@ Library
                  json >= 0.5,
                  aeson >= 0.6.0.2,
                  bytestring,
-                 rdf4h >= 0.9,
+                 rdf4h >= 0.9.1,
                  split >= 0.1.4.3
   ghc-options:   -Wall -fno-warn-unused-do-bind
   Extensions: RecordWildCards
