@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveDataTypeable #-}
 
 import Text.Bibtex.DBLPToBibtex (dblpToBibtex)
 import Text.Bibtex.SearchDBLPURIs (findURIByName)
@@ -66,12 +65,14 @@ main = do
   
   if not (null searchURI)
   then do
+
     -- Search Sindice for URIs
     uris <- findURIByName searchURI
     mapM_ putStrLn uris
   else
    if not (null genURI)
    then do
+
     -- Generate bibtex from DBLP URI
     bibtex <- dblpToBibtex includeXRef genURI
     let fname = if not (null (outfile opts))
@@ -79,6 +80,9 @@ main = do
                  else defaultFilename
     writeFile fname (unlines bibtex)
    else  do
+
     -- List papers for a URI
     titles <- publicationTitlesForAuthor lstURI
-    mapM_ putStrLn titles
+    mapM_ putStrLn (take 4 titles)
+    putStrLn "...\n"
+    putStrLn $ "Total publiations: " ++ show (length titles)

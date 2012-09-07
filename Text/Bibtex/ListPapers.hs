@@ -1,5 +1,5 @@
 module Text.Bibtex.ListPapers (
-    publicationTitlesForAuthor -- :: String -> IO String
+    publicationTitlesForAuthor
   ) where
 
 import Database.HSparql.Connection

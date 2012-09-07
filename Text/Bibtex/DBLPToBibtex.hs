@@ -1,5 +1,5 @@
 module Text.Bibtex.DBLPToBibtex (
-    dblpToBibtex -- :: String -> IO [String]
+    dblpToBibtex
   ) where
 
 import Database.HSparql.Connection

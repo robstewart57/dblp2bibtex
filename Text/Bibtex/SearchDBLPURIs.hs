@@ -1,8 +1,6 @@
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE OverloadedStrings #-}
 
 module Text.Bibtex.SearchDBLPURIs (
-    findURIByName -- :: String -> IO [String]
+    findURIByName
  ) where
 
 import Network.HTTP hiding (Done)
