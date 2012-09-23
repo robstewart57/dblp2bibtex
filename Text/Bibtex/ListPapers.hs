@@ -4,11 +4,13 @@ module Text.Bibtex.ListPapers (
 
 import Database.HSparql.Connection
 import Database.HSparql.QueryGenerator
+import Data.RDF hiding (triple)
+import qualified Data.Text as T
 
 publicationTitlesForAuthor :: String -> IO [String]
 publicationTitlesForAuthor authorURI = do
   (Just results) <- selectQuery "http://sparql.sindice.com/sparql" $ titlesQuery authorURI
-  let titles = map (\[TypedLiteral uri _] -> uri) results
+  let titles = map (\[Bound (LNode (TypedL titleT _))] -> T.unpack titleT) results
   return titles
 
 

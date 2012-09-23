@@ -4,8 +4,8 @@ module Text.Bibtex.DBLPToBibtex (
 
 import Database.HSparql.Connection
 import Database.HSparql.QueryGenerator
-import Data.Text.Lazy (pack,unpack,stripPrefix)
-import Data.Text.Lazy.Internal (Text)
+import Data.RDF hiding (triple)
+import qualified Data.Text as T
 import Data.Maybe (mapMaybe,fromJust,isJust)
 import Network.HTTP
 import Text.XML.HaXml.Parse
@@ -21,7 +21,7 @@ import Text.BibTeX.Entry
 dblpToBibtex :: Bool -> String -> IO [String]
 dblpToBibtex includeXRef authorURI = do
   keys <- getDBLPKeys authorURI
-  mapM (getEntry includeXRef . unpack) keys
+  mapM (getEntry includeXRef . T.unpack) keys
 
 selectPublications :: String -> Query SelectQuery
 selectPublications authorURI = do
@@ -32,12 +32,12 @@ selectPublications authorURI = do
   distinct
   return SelectQuery { queryVars = [publication] }
 
-getDBLPKeys :: String -> IO [Text]
+getDBLPKeys :: String -> IO [T.Text]
 getDBLPKeys authorURI = do
-  let dblpPrefix = pack "http://dblp.l3s.de/d2r/resource/publications/"
+  let dblpPrefix = T.pack "http://dblp.l3s.de/d2r/resource/publications/"
   (Just results) <- selectQuery "http://sparql.sindice.com/sparql" $ selectPublications authorURI
-  let uris = map (\[URI uri] -> pack uri) results
-  let dblpKeys = map (fromJust . stripPrefix dblpPrefix) uris
+  let uris = map (\[Bound (UNode uriT)] -> uriT) results
+  let dblpKeys = map (fromJust . T.stripPrefix dblpPrefix) uris
   return dblpKeys
 
 getEntry ::  Bool -> String -> IO String

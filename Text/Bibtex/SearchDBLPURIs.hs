@@ -7,9 +7,9 @@ import Network.HTTP hiding (Done)
 import Data.RDF
 import Data.RDF.TriplesGraph
 import Text.RDF.RDF4H.XmlParser
-import qualified Data.ByteString.Lazy.Char8 as B
 import Data.List.Split
 import System.IO (stdout, stderr, hSetBuffering, BufferMode(..))
+import qualified Data.Text as T
 
 queryURI :: String -> String
 queryURI name = "http://api.sindice.com/v3/search?fq=class:foaf:Agent&format=rdfxml&fq=domain:dblp.l3s.de&field=link&q=" ++ urlEncode name
@@ -23,7 +23,7 @@ findURIByName name = do
       request  = replaceHeader HdrUserAgent "dblp2bib-client" (getRequest url)
   xml <- simpleHTTP request >>= getResponseBody
   let doc = elimXmlHeader xml -- hack
-  let (Right (rdf::TriplesGraph)) = parseXmlRDF Nothing Nothing (B.pack doc)
+  let (Right (rdf::TriplesGraph)) = parseXmlRDF Nothing Nothing (T.pack doc)
   return $ getURIs rdf
 
 
@@ -31,7 +31,7 @@ getURIs :: TriplesGraph -> [String]
 getURIs rdf = 
   let triples = query rdf Nothing (Just (unode "link")) Nothing
       linksURIs = map objectOf triples
-      links = map (\(UNode s) -> (reverse . b2s . value) s) linksURIs
+      links = map (\(UNode s) -> t2s s) linksURIs
   in links
 
 -- This is a hack. This should be resolved by:
