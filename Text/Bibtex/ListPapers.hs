@@ -18,7 +18,7 @@ titlesQuery :: String -> Query SelectQuery
 titlesQuery authorURI = do
   foaf <- prefix "foaf" (iriRef "http://xmlns.com/foaf/0.1/")
   dc <- prefix "dc" (iriRef "http://purl.org/dc/elements/1.1/")
-  let author  = iriRef authorURI
+  let author  = iriRef (T.pack authorURI)
   publication <- var
   title <- var
   triple publication (foaf .:. "maker") author
