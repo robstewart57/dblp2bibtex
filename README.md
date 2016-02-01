@@ -1,5 +1,12 @@
 # dblp2bibtex
 
+**Note** This program depended on the Sindice web service. This
+  service was [shut down in May
+  2014](http://www.dataversity.net/end-support-sindice-com-search-engine-history-lessons-learned-legacy-guest-post/). For
+  this dblp2bibtex program to work again, an alternative web service
+  offering a similar interface to DBLP records will need to be
+  saught. Pull requests welcome!
+
 This `dblp2bibtex` tool provides 3 features, primarily generating bibtex files for authors identified in the DBLP database. Authors are disambiguated with Unique Resource Identifiers, which are used extensively in this utility.
 
 * Search for a DBLP URI given a name (e.g. "Simon Peyton Jones")
