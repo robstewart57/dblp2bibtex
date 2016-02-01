@@ -26,7 +26,7 @@ dblpToBibtex includeXRef authorURI = do
 selectPublications :: String -> Query SelectQuery
 selectPublications authorURI = do
   foaf <- prefix "foaf" (iriRef "http://xmlns.com/foaf/0.1/")
-  let author  = iriRef authorURI
+  let author  = iriRef (T.pack authorURI)
   publication <- var
   triple publication (foaf .:. "maker") author
   distinct
@@ -57,7 +57,7 @@ downloadXML key = do
   simpleHTTP request >>= getResponseBody
 
 entryFromXML :: String -> String -> (String, Maybe String)
-entryFromXML dblpKey xml = 
+entryFromXML dblpKey xml =
   let (Document _ _ root _) = xmlParse "error.log" xml
       rootElem = (CElem root noPos)
       dblpEntry = (tag "dblp" /> elm)
@@ -67,7 +67,7 @@ entryFromXML dblpKey xml =
 
       entryT = entryType' rootElem
 
-      authorTuple = 
+      authorTuple =
        let xs = extractTxt authorsQ rootElem
        in if null xs
           then []
@@ -94,11 +94,11 @@ entryFromXML dblpKey xml =
 
 
 confirmEntryType :: Content i -> String -> Bool
-confirmEntryType rootElem typeStr = 
+confirmEntryType rootElem typeStr =
   length ((tag "dblp" /> tag typeStr)  rootElem) > 0
-  
+
 entryType' :: Content i -> String
-entryType' rootElem = 
+entryType' rootElem =
   let xs = ["proceedings","inproceedings","article","misc","book","phdthesis","incollection"]
       xs'  = filter (confirmEntryType rootElem) xs
   in if null xs'
@@ -111,7 +111,7 @@ entryTuples rootElem dblpEntry =
   let keys = ["title","pages","year","booktitle","volume","journal","ee","number","pages"]
   in (mapMaybe entryTuple keys)
 
-  where 
+  where
    entryTuple :: String -> Maybe (String, String)
    entryTuple key =
     let xmlFilter = (dblpEntry /> tag key /> txt)
@@ -127,7 +127,7 @@ extractTxt xmlFilter event =
   in (concatMap validityCheck xs)
 
   where
-   validityCheck t = 
+   validityCheck t =
     case t of
      (CString _ y _) -> [y]
      _ -> []

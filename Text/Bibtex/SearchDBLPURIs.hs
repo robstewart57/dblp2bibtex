@@ -5,8 +5,6 @@ module Text.Bibtex.SearchDBLPURIs (
 
 import Network.HTTP hiding (Done)
 import Data.RDF
-import Data.RDF.TriplesGraph
-import Text.RDF.RDF4H.XmlParser
 import Data.List.Split
 import System.IO (stdout, stderr, hSetBuffering, BufferMode(..))
 import qualified Data.Text as T
@@ -23,20 +21,20 @@ findURIByName name = do
       request  = replaceHeader HdrUserAgent "dblp2bib-client" (getRequest url)
   xml <- simpleHTTP request >>= getResponseBody
   let doc = elimXmlHeader xml -- hack
-  let (Right (rdf::TriplesGraph)) = parseXmlRDF Nothing Nothing (T.pack doc)
+  let (Right (rdf::TriplesGraph)) = parseString (XmlParser Nothing Nothing) (T.pack doc)
   return $ getURIs rdf
 
 
 getURIs :: TriplesGraph -> [String]
-getURIs rdf = 
+getURIs rdf =
   let triples = query rdf Nothing (Just (unode "link")) Nothing
       linksURIs = map objectOf triples
-      links = map (\(UNode s) -> t2s s) linksURIs
+      links = map (\(UNode s) -> T.unpack s) linksURIs
   in links
 
 -- This is a hack. This should be resolved by:
 -- https://github.com/UweSchmidt/hxt/issues/4
 elimXmlHeader :: String -> String
-elimXmlHeader xml = 
+elimXmlHeader xml =
   let xs = splitOn "\n" xml
   in unlines $ tail xs
