@@ -1,57 +1,49 @@
-Name:          dblp2bibtex
-Homepage:      https://github.com/robstewart57/dblp2bibtex
-Version:       0.0.3
-Synopsis:      A DBLP URI to Bibtex file generation utility
-Category:      Data
-Description:
-    This `dblp2bibtex` tool provides 3 features, primarily generating bibtex files
-    for authors identified in the DBLP database. Authors are disambiguated with
-    Unique Resource Identifiers, which are used extensively in this utility.
-License:       GPL-3
-License-file:  LICENSE
-Author:        Rob Stewart
-Maintainer:    robstewart57@gmail.com
-Stability:     Experimental
-Build-type:    Simple
-Homepage:      https://github.com/robstewart57/dblp2bibtex
-Bug-Reports:   https://github.com/robstewart57/dblp2bibtex/issues
-Tested-With:   GHC==7.4.1
-Cabal-Version: >=1.6
+name:                dblp2bibtex
+version:             0.1.0.0
+-- synopsis:
+-- description:
+homepage:            https://github.com/githubuser/dblp2bibtex#readme
+license:             BSD3
+license-file:        LICENSE
+author:              Author name here
+maintainer:          example@example.com
+copyright:           2017 Author name here
+category:            Web
+build-type:          Simple
+extra-source-files:  README.md
+cabal-version:       >=1.10
 
-Executable dblp2bibtex
-  Extensions:    RecordWildCards
-                 DeriveDataTypeable
-                 DoAndIfThenElse
-                 ScopedTypeVariables
-                 OverloadedStrings
+library
+  hs-source-dirs:      src
+  exposed-modules:     DBLPToBibtex
+                     , BibtexProcessing
+  build-depends:       base >= 4.7 && < 5
+                     , text
+                     , network
+                     , rdf4h >= 3.0.1
+                     , HTTP
+                     , parsec
+                     , bibtex
+  default-language:    Haskell2010
 
-  Build-Depends: cmdargs >= 0.9.5
-  ghc-options:   -Wall -fno-warn-unused-do-bind
-  Main-is:	 Text/Bibtex/Main.hs
+executable dblp2bibtex
+  hs-source-dirs:      app
+  main-is:             Main.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  build-depends:       base
+                     , dblp2bibtex
+                     , cmdargs
+  default-language:    Haskell2010
 
-Library
-  Build-Depends: base >= 4,
-                 base <  5,
-                 HTTP >= 4,
-                 bibtex >= 0.1,
-                 HaXml >= 1.23.3,
-                 text,
-                 hsparql == 0.2.7,
-                 json >= 0.5,
-                 aeson >= 0.6.0.2,
-                 bytestring,
-                 rdf4h == 1.3.6,
-                 split >= 0.1.4.3
-  ghc-options:   -Wall -fno-warn-unused-do-bind
-  Extensions: RecordWildCards
-              OverloadedStrings
-              ScopedTypeVariables
-              DoAndIfThenElse
-  Exposed-Modules: Text.Bibtex.DBLPToBibtex
-                   Text.Bibtex.SearchDBLPURIs
-                   Text.Bibtex.ListPapers
-
+test-suite dblp2bibtex-test
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Spec.hs
+  build-depends:       base
+                     , dblp2bibtex
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  default-language:    Haskell2010
 
 source-repository head
   type:     git
-  location: git://github.com/robstewart57/dblp2bibtex.git
+  location: https://github.com/githubuser/dblp2bibtex
