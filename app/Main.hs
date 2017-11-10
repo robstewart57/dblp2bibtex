@@ -69,9 +69,11 @@ main = do
 
   bibtexProcessed <- filterUniqueEntries bibtexContent
   -- putStrLn bibtexProcessed
-  let fname = "output.bib"
+  let fname =
+        case (outfile opts) of
+          [] -> defaultFilename
+          fname -> fname
   writeBibtex bibtexProcessed fname
-
 
 readBibtexAuthorsList fname =
   catch
