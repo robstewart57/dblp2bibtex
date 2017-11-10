@@ -6,11 +6,9 @@ Ireland:Andrew
 Komendantskaya:Ekaterina
 Loidl:Hans=Wolfgang
 Michaelson:Greg_J=
-lsadsdksdfjdsldsjlkdsjldsjdslkjflkdsjflds
 Scholz:Sven=Bodo
 Taylor:Hamish
 Lin:Yuhui
-Schmidt:Martin
 Belikov:Evgenij
 Farka:Frantisek
 Farquhar:Colin
