@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE BangPatterns #-}
 
 module BibtexProcessing (
     filterUniqueEntries
@@ -15,13 +14,13 @@ import Text.Parsec.String
 filterUniqueEntries :: String -> IO String
 filterUniqueEntries bibtexData = do
   -- content <- readFile bibtexFile
-  let newContent = filter (\char -> char /= '\\') bibtexData
+  let newContent = filter (/= '\\') bibtexData
   -- writeFile bibtexFile newContent
   -- result <- parseFromFile file bibtexFile
-  let result = (runP file () "" newContent)
+  let result = runP file () "" newContent
   case result of
     Left e -> error (show e)
-    Right entries -> do
+    Right entries ->
       return $
         concatMap
         entry

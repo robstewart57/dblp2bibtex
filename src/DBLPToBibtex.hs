@@ -87,7 +87,7 @@ downloadUri retryCount url =
             findRetry (_ : hdrs) = findRetry hdrs
             -- add another second to be sure
         putStrLn $
-          "too many DBLP requests, retrying in " ++ (show (retryAfter + 1)) ++ " seconds."
+          "too many DBLP requests, retrying in " ++ show (retryAfter + 1) ++ " seconds."
         threadDelay ((retryAfter + 1) * 1000000)
         downloadUri (retryCount + 1) url
       (2,0,0) ->
