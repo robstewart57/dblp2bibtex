@@ -33,9 +33,9 @@ _COPYRIGHT = "(C) Rob Stewart 2017"
 
 myProgOpts :: MyOptions
 myProgOpts = MyOptions
-    { listAuthorFile = def &= typ "Author name list" &= help "Get bibtex file for given URI",
-      person = def  &= typ "Author name" &= help "Search for URI by name (e.g. \"Joe Bloggs\")",
-      outfile = def &= typ "Bibtex filename" &= help "(default 'export.bib')"
+    { listAuthorFile = def &= typ "Author ID list" &= help "Get bibtex file for all author IDs in a file"
+    ,  person = def  &= typ "Author ID" &= help "Get bibtex file for an author ID (e.g. \"Stewart:Robert_J=\")"
+    , outfile = def &= typ "Bibtex filename" &= help "(default 'export.bib')"
     }
 
 run :: Mode (CmdArgs MyOptions)
