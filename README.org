@@ -16,6 +16,9 @@ To obtain the DBLP for this author, run:
 dblp2bibtex --person=Stewart:Robert_J=
 #+END_SRC
 
+This will create an ~export.bib~ file containing details of this
+author's publications.
+
 It is also possible to obtain bibtex for multiple authors at
 once. This is done using the ~--listauthorfile=~ flag. It takes a
 filename, where this file contains a list of author IDs, one ID per
