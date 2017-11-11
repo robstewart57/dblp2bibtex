@@ -8,7 +8,7 @@ author:
 http://dblp.uni-trier.de/pers/hd/s/Stewart:Robert_J=
 
 Make a note of the text that follows the last ~/~ slash. In this case,
-/"Stewart:Robert_J="/.
+"Stewart:Robert_J=".
 
 To obtain the DBLP for this author, run:
 
