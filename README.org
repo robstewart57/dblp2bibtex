@@ -1,0 +1,31 @@
+* About dblp2bibtex
+
+dblp2bibtex extracts DBLP bibtex from the DBLP database.
+
+To use it, find the DBLP page for an author of interest. E.g. for the
+author:
+
+http://dblp.uni-trier.de/pers/hd/s/Stewart:Robert_J=
+
+Make a note of the text that follows the last ~/~ slash. In this case,
+/"Stewart:Robert_J="/.
+
+To obtain the DBLP for this author, run:
+
+#+BEGIN_SRC bash
+dblp2bibtex --person=Stewart:Robert_J=
+#+END_SRC
+
+It is also possible to obtain bibtex for multiple authors at
+once. This is done using the ~--listauthorfile=~ flag. It takes a
+filename, where this file contains a list of author IDs, one ID per
+line. An example is given in [[https://github.com/robstewart57/dblp2bibtex/blob/master/author-list.txt][author-list.txt]].
+
+
+* Installing
+
+Install the ~stack~ software: [[https://docs.haskellstack.org/en/stable/install_and_upgrade/][details]]. Then run:
+
+#+BEGIN_SRC bash
+stack install
+#+END_SRC
