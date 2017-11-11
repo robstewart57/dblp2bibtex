@@ -19,8 +19,14 @@ dblp2bibtex --person=Stewart:Robert_J=
 It is also possible to obtain bibtex for multiple authors at
 once. This is done using the ~--listauthorfile=~ flag. It takes a
 filename, where this file contains a list of author IDs, one ID per
-line. An example is given in [[https://github.com/robstewart57/dblp2bibtex/blob/master/author-list.txt][author-list.txt]].
+line. An example is given in [[https://github.com/robstewart57/dblp2bibtex/blob/master/author-list.txt][author-list.txt]]:
 
+#+BEGIN_SRC bash
+dblp2bibtex --listauthorfile=author-list.txt
+#+END_SRC
+
+The ~--outfile=~ flag allows the user to specify the filename of the
+generated bibtex file.
 
 * Installing
 
