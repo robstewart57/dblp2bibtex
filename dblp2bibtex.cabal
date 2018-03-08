@@ -24,6 +24,9 @@ library
                      , HTTP
                      , parsec
                      , bibtex
+                     , http-conduit
+                     , bytestring >= 0.10.2.0
+                     , lifted-base >= 0.1.0.3
   default-language:    Haskell2010
 
 executable dblp2bibtex

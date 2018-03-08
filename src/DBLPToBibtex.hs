@@ -1,3 +1,4 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module DBLPToBibtex (
@@ -7,12 +8,17 @@ module DBLPToBibtex (
 
 import Control.Concurrent
 import Control.Exception
+import Control.Exception.Lifted
 import Control.Monad
+import Data.ByteString (ByteString)
+import qualified Data.ByteString.Lazy as BS
 import Data.Char
 import Data.Either
 import Data.RDF hiding (triple)
 import qualified Data.Text as T
+import Data.Text.Encoding as E
 import Network.HTTP
+import Network.HTTP.Conduit
 import Network.HTTP.Headers
 import Network.Browser
 import System.IO
@@ -62,7 +68,25 @@ downloadUri retryCount url =
     let err = "we are repeatedly making too many DBLPrequests, giving up."
     hPutStr stderr err
     return (Left err)
-  else do
+  else
+    if (T.pack "http:") `T.isPrefixOf` (T.pack url)
+    then downloadHttp retryCount url
+    else if (T.pack "https:") `T.isPrefixOf` (T.pack url)
+    then downloadHttps retryCount url
+    else error ("unknown prefix for URL: " ++ url)
+
+downloadHttps :: Int -> String -> IO (Either String String)
+downloadHttps retryCount url = do
+  result <- Control.Exception.Lifted.try $ simpleHttp url
+  case result of
+    Left (ex::HttpException) -> error (show ex)
+    Right bs -> do
+      let s = T.unpack (E.decodeUtf8 (BS.toStrict bs))
+      putStrLn ("got: " ++ s)
+      return (Right s)
+
+downloadHttp :: Int -> String -> IO (Either String String)
+downloadHttp retryCount url = do    
     (_, rsp) <- Network.Browser.browse $ do
       setAllowRedirects True -- handle HTTP redirects
       setOutHandler (const (return ()))
