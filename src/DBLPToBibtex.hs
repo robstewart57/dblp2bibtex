@@ -31,11 +31,11 @@ import BibtexProcessing
 -- example authorOf object: StewartMBGW16
 -- "http://dblp.org/rec/bib2/conf/ica3pp/" ++ authorOfURI ++ ".bib"
 
-dblpToBibtexAuthorList :: [String] -> IO String
+dblpToBibtexAuthorList :: [String] -> IO T.Text
 dblpToBibtexAuthorList authors =
-  concat <$> mapM dblpToBibtexAuthor authors
+  T.concat <$> mapM dblpToBibtexAuthor authors
 
-dblpToBibtexAuthor :: String -> IO String
+dblpToBibtexAuthor :: String -> IO T.Text
 dblpToBibtexAuthor userId = do
   putStr ("searching for author " ++ userId ++ "\n")
   let firstInitial = toLower (head userId)
@@ -58,9 +58,9 @@ dblpToBibtexAuthor userId = do
                    let (UNode pubUri) = objectOf triple
                    in T.unpack pubUri ++ ".bib") triples
       mapM (downloadUri 0) publicationUris
-  return (unlines (rights bibtexData))
+  return (T.unlines (rights bibtexData))
 
-downloadUri :: Int -> String -> IO (Either String String)
+downloadUri :: Int -> String -> IO (Either String T.Text)
 downloadUri retryCount url =
   -- arbitrarily chosen number
   if retryCount > 3
@@ -75,17 +75,26 @@ downloadUri retryCount url =
     then downloadHttps retryCount url
     else error ("unknown prefix for URL: " ++ url)
 
-downloadHttps :: Int -> String -> IO (Either String String)
+downloadHttps :: Int -> String -> IO (Either String T.Text)
 downloadHttps retryCount url = do
   result <- Control.Exception.Lifted.try $ simpleHttp url
   case result of
-    Left (ex::HttpException) -> error (show ex)
+    Left (ex::HttpException) ->
+      case ex of
+        (HttpExceptionRequest req content) ->
+          case content of
+            ConnectionTimeout -> do
+              let retryAfter = 60
+              putStrLn $
+                "too many DBLP requests, retrying in " ++ show (retryAfter + 1) ++ " seconds."
+              threadDelay ((retryAfter + 1) * 1000000)
+              downloadUri (retryCount + 1) url
+            _ -> error ("HttpExceptionRequest content: " ++ show content)
     Right bs -> do
-      let s = T.unpack (E.decodeUtf8 (BS.toStrict bs))
-      putStrLn ("got: " ++ s)
+      let s = E.decodeUtf8 (BS.toStrict bs)
       return (Right s)
 
-downloadHttp :: Int -> String -> IO (Either String String)
+downloadHttp :: Int -> String -> IO (Either String T.Text)
 downloadHttp retryCount url = do    
     (_, rsp) <- Network.Browser.browse $ do
       setAllowRedirects True -- handle HTTP redirects
@@ -115,5 +124,5 @@ downloadHttp retryCount url = do
         threadDelay ((retryAfter + 1) * 1000000)
         downloadUri (retryCount + 1) url
       (2,0,0) ->
-        return (Right (rspBody rsp))
+        return (Right (T.pack (rspBody rsp)))
       code -> error (show code)

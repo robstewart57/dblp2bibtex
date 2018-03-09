@@ -9,6 +9,7 @@ import System.IO
 
 import DBLPToBibtex
 import BibtexProcessing
+import qualified Data.Text.IO as TIO
 
 data MyOptions = MyOptions
     { listAuthorFile :: String,
@@ -84,7 +85,7 @@ readBibtexAuthorsList fname =
 
 writeBibtex bibtexContents fname =
   catch
-  (writeFile fname bibtexContents)
+  (TIO.writeFile fname bibtexContents)
   (\e -> do let err = show (e :: IOException)
             hPutStr stderr ("Warning: Couldn't write to " ++ fname ++ ": " ++ err ++ "\n")
   )
