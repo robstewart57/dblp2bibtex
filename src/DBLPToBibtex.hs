@@ -27,7 +27,7 @@ import BibtexProcessing
 
 -- example userId: Stewart:Robert_J
 -- "http://dblp.uni-trier.de/pers/tr/s/" ++ userId ++ "=.nt"
---
+
 -- example authorOf object: StewartMBGW16
 -- "http://dblp.org/rec/bib2/conf/ica3pp/" ++ authorOfURI ++ ".bib"
 
@@ -37,21 +37,21 @@ dblpToBibtexAuthorList authors =
 
 dblpToBibtexAuthor :: String -> IO T.Text
 dblpToBibtexAuthor userId = do
-  putStr ("searching for author " ++ userId ++ "\n")
+  putStrLn ("\nSearching for author " ++ userId)
   let firstInitial = toLower (head userId)
-  let uri = "http://dblp.uni-trier.de/pers/tr/" ++ [firstInitial] ++ "/" ++ userId ++ ".nt"
+  let uri = "https://dblp.uni-trier.de/pers/tr/" ++ [firstInitial] ++ "/" ++ userId ++ ".nt"
   -- putStrLn ("downloading " ++ uri)
   result <- parseURL NTriplesParser uri :: IO (Either ParseFailure (RDF TList))
   bibtexData <- case result of
     Left err -> do
-      hPutStr stderr ("cannot find author " ++ userId ++ "\n")
+      hPutStr stderr ("cannot find author " ++ userId ++ "\n\n" ++ show err ++ "\n")
       return [Left ""]
     Right rdfGraph -> do
       let triples =
             query
             rdfGraph
             Nothing
-            (Just (unode "http://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf"))
+            (Just (unode "https://dblp.uni-trier.de/rdf/schema-2017-04-18#authorOf"))
             Nothing
           publicationUris =
             map (\triple ->
@@ -68,7 +68,8 @@ downloadUri retryCount url =
     let err = "we are repeatedly making too many DBLPrequests, giving up."
     hPutStr stderr err
     return (Left err)
-  else
+  else do
+    putStr ("downloading " ++ url)
     if (T.pack "http:") `T.isPrefixOf` (T.pack url)
     then downloadHttp retryCount url
     else if (T.pack "https:") `T.isPrefixOf` (T.pack url)
@@ -86,11 +87,12 @@ downloadHttps retryCount url = do
             ConnectionTimeout -> do
               let retryAfter = 60
               putStrLn $
-                "too many DBLP requests, retrying in " ++ show (retryAfter + 1) ++ " seconds."
+                "\ntoo many DBLP requests, retrying in " ++ show (retryAfter + 1) ++ " seconds."
               threadDelay ((retryAfter + 1) * 1000000)
               downloadUri (retryCount + 1) url
             _ -> error ("HttpExceptionRequest content: " ++ show content)
     Right bs -> do
+      putStr " ... downloaded.\n"
       let s = E.decodeUtf8 (BS.toStrict bs)
       return (Right s)
 
@@ -120,9 +122,10 @@ downloadHttp retryCount url = do
             findRetry (_ : hdrs) = findRetry hdrs
             -- add another second to be sure
         putStrLn $
-          "too many DBLP requests, retrying in " ++ show (retryAfter + 1) ++ " seconds."
+          "\ntoo many DBLP requests, retrying in " ++ show (retryAfter + 1) ++ " seconds."
         threadDelay ((retryAfter + 1) * 1000000)
         downloadUri (retryCount + 1) url
-      (2,0,0) ->
+      (2,0,0) -> do
+        putStr " ... downloaded.\n"
         return (Right (T.pack (rspBody rsp)))
       code -> error (show code)
