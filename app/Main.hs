@@ -2,20 +2,21 @@
 
 module Main where
 
+import BibtexProcessing
 import Control.Exception
 import Control.Monad
+import DBLPToBibtex
+import qualified Data.Text as T
+import qualified Data.Text.IO as TIO
 import System.Console.CmdArgs
 import System.IO
 
-import DBLPToBibtex
-import BibtexProcessing
-import qualified Data.Text.IO as TIO
-
 data MyOptions = MyOptions
-    { listAuthorFile :: String,
-      person :: String,
-      outfile :: String
-    } deriving (Data, Show, Eq)
+  { listAuthorFile :: String,
+    person :: String,
+    outfile :: String
+  }
+  deriving (Data, Show, Eq)
 
 _PROGRAM_NAME :: String
 _PROGRAM_NAME = "dblp2bibtex"
@@ -33,19 +34,22 @@ _COPYRIGHT :: String
 _COPYRIGHT = "(C) Rob Stewart 2017"
 
 myProgOpts :: MyOptions
-myProgOpts = MyOptions
-    { listAuthorFile = def &= typ "Author ID list" &= help "Get bibtex file for all author IDs in a file"
-    ,  person = def  &= typ "Author ID" &= help "Get bibtex file for an author ID (e.g. \"Stewart:Robert_J=\")"
-    , outfile = def &= typ "Bibtex filename" &= help "(default 'export.bib')"
+myProgOpts =
+  MyOptions
+    { listAuthorFile = def &= typ "Author ID list" &= help "Get bibtex file for all author IDs in a file",
+      person = def &= typ "Author ID" &= help "Get bibtex file for an author ID (e.g. \"Stewart:Robert_J=\")",
+      outfile = def &= typ "Bibtex filename" &= help "(default 'export.bib')"
     }
 
 run :: Mode (CmdArgs MyOptions)
-run = cmdArgsMode $ myProgOpts
-       &= versionArg [explicit, name "version", name "v", summary _PROGRAM_INFO]
-       &= summary (_PROGRAM_INFO ++ ", " ++ _COPYRIGHT)
-       &= help _PROGRAM_ABOUT
-       &= helpArg [explicit, name "help", name "h"]
-       &= program _PROGRAM_NAME
+run =
+  cmdArgsMode $
+    myProgOpts
+      &= versionArg [explicit, name "version", name "v", summary _PROGRAM_INFO]
+      &= summary (_PROGRAM_INFO ++ ", " ++ _COPYRIGHT)
+      &= help _PROGRAM_ABOUT
+      &= helpArg [explicit, name "help", name "h"]
+      &= program _PROGRAM_NAME
 
 defaultFilename :: String
 defaultFilename = "export.bib"
@@ -56,16 +60,25 @@ main = do
   hSetBuffering stderr NoBuffering
   opts <- cmdArgsRun run
   let authors = listAuthorFile opts
-  let author  = person opts
-  bibtexContent <- case (authors,author) of
-    ([],[]) ->
+  let author = person opts
+  bibtexContent <- case (authors, author) of
+    ([], []) ->
       error "--listauthorfile or --person must be used"
-    ([],personId) ->
+    ([], personId@(_ : _)) ->
       dblpToBibtexAuthor personId
-    (filenameAuthorsList,[]) -> do
-      authors <- lines <$> readBibtexAuthorsList authors
-      dblpToBibtexAuthorList authors
-    (_,_) ->
+    (filenameAuthorsList@(_ : _), []) -> do
+      fileLines <- lines <$> readBibtexAuthorsList filenameAuthorsList
+      let authorPids =
+            filter
+              ( \line -> case line of
+                  [] -> False
+                  ['#'] -> False
+                  ('#' : _) -> False
+                  _ -> True
+              )
+              fileLines
+      dblpToBibtexAuthorList authorPids
+    (_, _) ->
       error "cannot both be used"
 
   bibtexProcessed <- filterUniqueEntries bibtexContent
@@ -78,14 +91,16 @@ main = do
 
 readBibtexAuthorsList fname =
   catch
-  (readFile fname)
-  (\e -> do let err = show (e :: IOException)
-            error ("Warning: Couldn't open " ++ fname ++ ": " ++ err ++ "\n")
-  )
+    (readFile fname)
+    ( \e -> do
+        let err = show (e :: IOException)
+        error ("Warning: Couldn't open " ++ fname ++ ": " ++ err ++ "\n")
+    )
 
 writeBibtex bibtexContents fname =
   catch
-  (TIO.writeFile fname bibtexContents)
-  (\e -> do let err = show (e :: IOException)
-            hPutStr stderr ("Warning: Couldn't write to " ++ fname ++ ": " ++ err ++ "\n")
-  )
+    (TIO.writeFile fname bibtexContents)
+    ( \e -> do
+        let err = show (e :: IOException)
+        hPutStr stderr ("Warning: Couldn't write to " ++ fname ++ ": " ++ err ++ "\n")
+    )
