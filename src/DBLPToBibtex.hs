@@ -37,7 +37,7 @@ dblpToBibtexAuthorList authorPids = do
   let allPaperURIsNoDuplicates = nub allPaperURIs
       howManyDuplicates = length allPaperURIs - length allPaperURIsNoDuplicates
   when (howManyDuplicates > 0) $ putStrLn ("removing " <> show howManyDuplicates <> " duplicate papers for co-authored papers")
-  (T.concat . rights) <$> mapM paperUriToBib allPaperURIsNoDuplicates
+  T.concat . rights <$> mapM paperUriToBib allPaperURIsNoDuplicates
 
 paperUriToBib :: T.Text -> IO (Either String T.Text)
 paperUriToBib paperUri = do
@@ -75,15 +75,15 @@ downloadUri retryCount url =
   -- arbitrarily chosen number
   if retryCount > 3
     then do
-      let err = "we are repeatedly making too many DBLPrequests, giving up."
-      hPutStr stderr err
-      return (Left err)
+      let dblpErr = "we are repeatedly making too many DBLPrequests, giving up."
+      hPutStr stderr dblpErr
+      return (Left dblpErr)
     else do
       putStr ("downloading " ++ T.unpack url)
-      if (T.pack "http:") `T.isPrefixOf` url
+      if T.pack "http:" `T.isPrefixOf` url
         then downloadHttp retryCount url
         else
-          if (T.pack "https:") `T.isPrefixOf` url
+          if T.pack "https:" `T.isPrefixOf` url
             then downloadHttps retryCount url
             else error ("unknown prefix for URL: " ++ T.unpack url)
 
@@ -96,7 +96,7 @@ downloadHttps retryCount url = do
         (InvalidUrlException invalidURL reason) -> do
           hPutStr stderr ("URL " <> invalidURL <> " is invalid because " <> reason)
           return (Left reason)
-        (HttpExceptionRequest req content) ->
+        (HttpExceptionRequest _ content) ->
           case content of
             ConnectionTimeout -> do
               let retryAfter = 60
@@ -127,20 +127,20 @@ downloadHttp retryCount url = do
     request $ getRequest (T.unpack url)
   case rspCode rsp of
     (3, 0, 3) -> do
-      let err = "cannot download: " ++ show url
-      hPutStr stderr err
-      return (Left err)
+      let dblpErr = "cannot download: " ++ show url
+      hPutStr stderr dblpErr
+      return (Left dblpErr)
     (4, 0, 4) -> do
-      let err = "cannot be found: " ++ show url
-      hPutStr stderr err
-      return (Left err)
+      let dblpErr = "cannot be found: " ++ show url
+      hPutStr stderr dblpErr
+      return (Left dblpErr)
     -- to many requests
     (4, 2, 9) -> do
       let headers = rspHeaders rsp
           retryAfter :: Int
           retryAfter = findRetry headers
           findRetry [] = error "cannot find Retry-After header"
-          findRetry (Header HdrRetryAfter i : hdrs) = read i
+          findRetry (Header HdrRetryAfter i : _hdrs) = read i
           findRetry (_ : hdrs) = findRetry hdrs
       -- add another second to be sure
       putStrLn $

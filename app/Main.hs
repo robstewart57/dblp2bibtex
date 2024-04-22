@@ -4,7 +4,6 @@ module Main where
 
 import BibtexProcessing
 import Control.Exception
-import Control.Monad
 import DBLPToBibtex
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
@@ -84,11 +83,12 @@ main = do
   bibtexProcessed <- filterUniqueEntries bibtexContent
   -- putStrLn bibtexProcessed
   let fname =
-        case (outfile opts) of
+        case outfile opts of
           [] -> defaultFilename
-          fname -> fname
+          outFname -> outFname
   writeBibtex bibtexProcessed fname
 
+readBibtexAuthorsList :: String -> IO String
 readBibtexAuthorsList fname =
   catch
     (readFile fname)
@@ -97,6 +97,7 @@ readBibtexAuthorsList fname =
         error ("Warning: Couldn't open " ++ fname ++ ": " ++ err ++ "\n")
     )
 
+writeBibtex :: T.Text -> String -> IO ()
 writeBibtex bibtexContents fname =
   catch
     (TIO.writeFile fname bibtexContents)
