@@ -5,7 +5,7 @@ The ~dblp2bibtex~ command extracts DBLP bibtex from the DBLP database.
 To use it, find the DBLP page for an author of interest. E.g. for the
 author:
 
-http://dblp.uni-trier.de/pers/hd/s/Stewart:Robert_J=
+https://dblp.uni-trier.de/pid/13/10106.html
 
 Then find the PID for the author. From [[https://dblp.org/faq/How+can+I+fetch+all+publications+of+one+specific+author.html][here]]:
 
@@ -14,6 +14,8 @@ Then find the PID for the author. From [[https://dblp.org/faq/How+can+I+fetch+al
 that researcher's dblp web page and find the short URL within the "share"
 drop-down menu next to the researcher's name in the title bar."
 #+end_quote
+
+The PID is the text between ~pid/~ and ~.html~ in that URL above.
 
 To obtain a bibtex file for this author use ~--person~ and provide the PID:
 
