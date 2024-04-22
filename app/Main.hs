@@ -30,7 +30,7 @@ _PROGRAM_ABOUT :: String
 _PROGRAM_ABOUT = "This program generates bibtex files for an author identified in DBLP"
 
 _COPYRIGHT :: String
-_COPYRIGHT = "(C) Rob Stewart 2017"
+_COPYRIGHT = "(C) Rob Stewart 2024"
 
 myProgOpts :: MyOptions
 myProgOpts =
