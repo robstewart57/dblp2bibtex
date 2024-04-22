@@ -21,6 +21,7 @@ import Data.Maybe
 import Data.RDF hiding (triple)
 import qualified Data.Text as T
 import Data.Text.Encoding as E
+import qualified Data.Text.Encoding as T
 import Network.Browser
 import Network.HTTP
 import Network.HTTP.Conduit
@@ -44,13 +45,13 @@ paperUriToBib paperUri = do
 
 dblpPidToPaperURIs :: String -> IO [T.Text]
 dblpPidToPaperURIs dblpPid = do
-  putStrLn ("\nSearching for author " ++ dblpPid)
+  putStrLn ("Searching for author " ++ dblpPid)
   let uri = "https://dblp.org/pid/" ++ dblpPid ++ ".nt"
   -- putStrLn ("downloading " ++ uri)
   result <- parseURL NTriplesParser uri :: IO (Either ParseFailure (RDF TList))
   paperUris <- case result of
-    Left err -> do
-      hPutStr stderr ("cannot find author " ++ dblpPid ++ "\n\n" ++ show err ++ "\n")
+    Left _err -> do
+      hPutStr stderr ("cannot find author with DBLP pid " ++ dblpPid ++ "\n")
       return Nothing
     Right rdfGraph -> do
       let triples =
@@ -90,14 +91,25 @@ downloadHttps :: Int -> T.Text -> IO (Either String T.Text)
 downloadHttps retryCount url = do
   result <- Control.Exception.Lifted.try $ simpleHttp (T.unpack url)
   case result of
-    Left (ex :: HttpException) ->
-      case ex of
+    Left (theException :: HttpException) ->
+      case theException of
+        (InvalidUrlException invalidURL reason) -> do
+          hPutStr stderr ("URL " <> invalidURL <> " is invalid because " <> reason)
+          return (Left reason)
         (HttpExceptionRequest req content) ->
           case content of
             ConnectionTimeout -> do
               let retryAfter = 60
               putStrLn $
-                "\ntoo many DBLP requests, retrying in " ++ show (retryAfter + 1) ++ " seconds."
+                "\ntoo many DBLP requests, retrying in " ++ show retryAfter ++ " seconds."
+              threadDelay ((retryAfter + 1) * 1000000)
+              downloadUri (retryCount + 1) url
+            StatusCodeException resp _ -> do
+              let retryAfter =
+                    let (_, retryTime) = head $ filter (\(headerName, _) -> headerName == "Retry-After") (responseHeaders resp)
+                     in read (T.unpack (T.decodeASCII retryTime))
+              putStrLn $
+                "\ntoo many DBLP requests, retrying in " ++ show retryAfter ++ " seconds."
               threadDelay ((retryAfter + 1) * 1000000)
               downloadUri (retryCount + 1) url
             _ -> error ("HttpExceptionRequest content: " ++ show content)
