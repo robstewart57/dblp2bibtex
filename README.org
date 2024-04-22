@@ -7,13 +7,17 @@ author:
 
 http://dblp.uni-trier.de/pers/hd/s/Stewart:Robert_J=
 
-Make a note of the text that follows the last ~/~ slash. In this case,
-"Stewart:Robert_J=".
+Then find the PID for the author. From
+[here](https://dblp.org/faq/How+can+I+fetch+all+publications+of+one+specific+author.html):
 
-To obtain the DBLP for this author, run:
+"To find the PID-based resource URI of a particular researcher, please visit
+that researcher's dblp web page and find the short URL within the "share"
+drop-down menu next to the researcher's name in the title bar."
+
+To obtain a bibtex file for this author use `--person` and provide the PID:
 
 #+BEGIN_SRC bash
-dblp2bibtex --person=Stewart:Robert_J=
+dblp2bibtex --person=13/10106
 #+END_SRC
 
 This will create an ~export.bib~ file containing details of this
@@ -21,8 +25,10 @@ author's publications.
 
 It is also possible to obtain bibtex for multiple authors at
 once. This is done using the ~--listauthorfile=~ flag. It takes a
-filename, where this file contains a list of author IDs, one ID per
-line. An example is given in [[https://github.com/robstewart57/dblp2bibtex/blob/master/author-list.txt][author-list.txt]]:
+filename, where this file contains a list of author PIDs, one PID per
+line. Lines starting with "#" are treated as comments and are ignored.
+
+An example is given in [[https://github.com/robstewart57/dblp2bibtex/blob/master/author-list.txt][author-list.txt]]:
 
 #+BEGIN_SRC bash
 dblp2bibtex --listauthorfile=author-list.txt
